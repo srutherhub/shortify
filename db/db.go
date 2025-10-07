@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"log"
+	"time"
 
 	"github.com/teris-io/shortid"
 	_ "modernc.org/sqlite"
@@ -24,7 +25,9 @@ func Init() {
 
 	_, err = DB.Exec(`CREATE TABLE IF NOT EXISTS urls (
 		id TEXT PRIMARY KEY,
-		url TEXT NOT NULL
+		url TEXT NOT NULL,
+		created_at NUMBER NOT NULL,
+		click_count INTEGER NOT NULL DEFAULT 0
 	)`)
 
 	if err != nil {
@@ -42,9 +45,19 @@ func GetURLFromID(id string) (string, error) {
 	return url, nil
 }
 
-func InsertNewURL(url string) error {
+func InsertNewURL(url string) (string, error) {
 	id := CreateUniqueID()
-	_, err := DB.Exec(`INSERT into urls(id,url) VALUES(?,?)`, id, url)
+	now := time.Now().Unix()
+	_, err := DB.Exec(`INSERT into urls(id,url,created_at) VALUES(?,?,?)`, id, url, now)
+
+	if err != nil {
+		return "", err
+	}
+	return id, nil
+}
+
+func IncrementURLClickCount(id string) error {
+	_, err := DB.Exec(`UPDATE urls SET click_count = click_count + 1 WHERE id = ?`, id)
 	return err
 }
 
