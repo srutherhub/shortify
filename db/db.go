@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"time"
 
@@ -48,6 +49,11 @@ func GetURLFromID(id string) (string, error) {
 func InsertNewURL(url string) (string, error) {
 	id := CreateUniqueID()
 	now := time.Now().Unix()
+
+	if !isURLHttps(url) {
+		return "", errors.New("URL is not Https")
+	}
+
 	_, err := DB.Exec(`INSERT into urls(id,url,created_at) VALUES(?,?,?)`, id, url, now)
 
 	if err != nil {
@@ -64,4 +70,13 @@ func IncrementURLClickCount(id string) error {
 func CreateUniqueID() string {
 	id := shortid.MustGenerate()
 	return id
+}
+
+func isURLHttps(url string) bool {
+	firstEightChars := url[:8]
+	if firstEightChars == "https://" {
+		return true
+	} else {
+		return false
+	}
 }

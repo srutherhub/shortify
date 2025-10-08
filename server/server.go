@@ -62,12 +62,12 @@ func apiURLShortifyHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 
 	if err != nil {
-		http.Error(w, "Request body: Invalid request body.", http.StatusBadRequest)
+		http.Error(w, "Request body: Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	if requestBody.URL == "" {
-		http.Error(w, "Request body: url cannot be empty.", http.StatusBadRequest)
+		http.Error(w, "Request body: url cannot be empty", http.StatusBadRequest)
 		return
 	}
 
@@ -75,7 +75,7 @@ func apiURLShortifyHandler(w http.ResponseWriter, r *http.Request) {
 	id, err = db.InsertNewURL(requestBody.URL)
 
 	if err != nil {
-		http.Error(w, "Failed to shortify url.", http.StatusBadRequest)
+		http.Error(w, "Failed to shortify: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -87,7 +87,7 @@ func apiURLShortifyHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, "Failed to encode JSON.", http.StatusBadRequest)
+		http.Error(w, "Failed to encode JSON", http.StatusBadRequest)
 	}
 
 }
