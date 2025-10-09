@@ -50,8 +50,12 @@ func InsertNewURL(url string) (string, error) {
 	id := CreateUniqueID()
 	now := time.Now().Unix()
 
+	if len(url) < 8 {
+		return "", errors.New("invalid url")
+	}
+
 	if !isURLHttps(url) {
-		return "", errors.New("URL is not Https")
+		return "", errors.New("url is not https")
 	}
 
 	_, err := DB.Exec(`INSERT into urls(id,url,created_at) VALUES(?,?,?)`, id, url, now)

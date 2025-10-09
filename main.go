@@ -7,6 +7,5 @@ import (
 
 func main() {
 	db.Init()
-	db.InsertNewURL("https://www.google.com")
 	server.Init()
 }
