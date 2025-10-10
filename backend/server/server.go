@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"reflect"
 	"shortify/db"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 type ServerError string
@@ -40,11 +40,15 @@ const (
 )
 
 const RedirectEndpoint = "http://localhost:8080/go/"
+const HankoURL = "https://7e09ca18-a6ff-46fc-b43a-4d35c0aa2cf2.hanko.io"
+
+var HankoValidator = NewHankoSessionValidator(HankoURL)
 
 var Routes = []Route{
 	{Path: "/", Method: http.MethodGet, Handler: homeHandler},
 	{Path: "/go/{id}", Method: http.MethodGet, Handler: urlRedirectHandler},
-	{Path: "/api/url/shortify", Method: http.MethodPost, Handler: apiURLShortifyHandler},
+	{Path: "/api/url/shortify", Method: http.MethodPost, Handler: AuthMiddleware(HankoValidator)(apiURLShortifyHandler)},
+	{Path: "/api/auth/validate", Method: http.MethodGet, Handler: AuthMiddleware(HankoValidator)(apiAuthValidateSessionHandler)},
 }
 
 // func MiddleWareExample(handler http.HandlerFunc) http.HandlerFunc {
@@ -56,10 +60,38 @@ var Routes = []Route{
 
 func Init() {
 	r := mux.NewRouter()
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+		AllowCredentials: true,
+	})
+
+	handler := c.Handler(r)
+
 	for _, route := range Routes {
 		r.HandleFunc(route.Path, route.Handler).Methods(route.Method)
 	}
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Fatal(http.ListenAndServe(":8080", handler))
+}
+
+func JSONResponse(w http.ResponseWriter, data any) {
+	var err error
+	w.Header().Set("Content-Type", "application/json")
+
+	switch d := data.(type) {
+	case ServerErrorResponse:
+		w.WriteHeader(d.Status)
+	default:
+		w.WriteHeader(http.StatusOK)
+	}
+
+	err = json.NewEncoder(w).Encode(data)
+
+	if err != nil {
+		http.Error(w, "Failed to encode JSON", http.StatusBadRequest)
+		return
+	}
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -109,22 +141,6 @@ func apiURLShortifyHandler(w http.ResponseWriter, r *http.Request) {
 	JSONResponse(w, response)
 }
 
-func JSONResponse(w http.ResponseWriter, data any) {
-	var err error
-	w.Header().Set("Content-Type", "application/json")
+func apiAuthValidateSessionHandler(w http.ResponseWriter, r *http.Request) {
 
-	dataType := reflect.TypeOf(data).Name()
-
-	if dataType == "ServerError" {
-		w.WriteHeader(http.StatusBadRequest)
-	} else {
-		w.WriteHeader(http.StatusOK)
-	}
-
-	err = json.NewEncoder(w).Encode(data)
-
-	if err != nil {
-		http.Error(w, "Failed to encode JSON", http.StatusBadRequest)
-		return
-	}
 }
