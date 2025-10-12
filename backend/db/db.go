@@ -1,49 +1,51 @@
 package db
 
 import (
-	"database/sql"
+	"context"
 	"errors"
+	"fmt"
 	"log"
+	"os"
+	dbsqlc "shortify/db/sqlc"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
 	"github.com/teris-io/shortid"
-	_ "modernc.org/sqlite"
 )
 
-var DB *sql.DB
+var Queries *dbsqlc.Queries
+var ctx = context.Background()
 
 func Init() {
-	var err error
-	DB, err = sql.Open("sqlite", "shortify.db")
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("No .env file found, reading environment variables")
+	}
+
+	dbURL := os.Getenv("DB_URL")
+
+	fmt.Println(os.Getenv("DB_URL"))
+	pool, err := pgxpool.New(ctx, dbURL)
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = DB.Exec("PRAGMA journal_mode=WAL;")
+	err = pool.Ping(ctx)
 	if err != nil {
-		log.Fatal("Failed to enable WAL mode:", err)
+		log.Fatalf("Unable to ping database: %v\n", err)
 	}
-
-	_, err = DB.Exec(`CREATE TABLE IF NOT EXISTS urls (
-		id TEXT PRIMARY KEY,
-		url TEXT NOT NULL,
-		created_at NUMBER NOT NULL,
-		click_count INTEGER NOT NULL DEFAULT 0
-	)`)
-
-	if err != nil {
-		panic(err)
-	}
-
+	Queries = dbsqlc.New(pool)
 }
 
-func GetURLFromID(id string) (string, error) {
-	var url string
-	err := DB.QueryRow(`SELECT url from urls WHERE id = ?`, id).Scan(&url)
+func GetURL(id string) (dbsqlc.GetUrlFromIDRow, error) {
+	var data dbsqlc.GetUrlFromIDRow
+	data, err := Queries.GetUrlFromID(ctx, id)
 	if err != nil {
-		return "", err
+		return dbsqlc.GetUrlFromIDRow{Url: "", RouteName: ""}, err
 	}
-	return url, nil
+	return data, nil
 }
 
 func InsertNewURL(url string) (string, error) {
@@ -58,7 +60,7 @@ func InsertNewURL(url string) (string, error) {
 		return "", errors.New("url is not https")
 	}
 
-	_, err := DB.Exec(`INSERT into urls(id,url,created_at) VALUES(?,?,?)`, id, url, now)
+	err := Queries.InsertNewUrl(ctx, dbsqlc.InsertNewUrlParams{ID: id, Url: url, CreatedAt: now})
 
 	if err != nil {
 		return "", err
@@ -67,7 +69,7 @@ func InsertNewURL(url string) (string, error) {
 }
 
 func IncrementURLClickCount(id string) error {
-	_, err := DB.Exec(`UPDATE urls SET click_count = click_count + 1 WHERE id = ?`, id)
+	err := Queries.IncrementUrlClickCount(ctx, id)
 	return err
 }
 
@@ -83,4 +85,21 @@ func isURLHttps(url string) bool {
 	} else {
 		return false
 	}
+}
+
+func IsUrlActive(created_at int64, expires_at pgtype.Int8) bool {
+	now := time.Now().Unix()
+	const default180DayExpiry = 180 * 24 * 60 * 60
+	if expires_at.Valid {
+		if expires_at.Int64 <= now {
+			return false
+		} else {
+			return true
+		}
+	}
+
+	if now >= created_at+default180DayExpiry {
+		return false
+	}
+	return true
 }

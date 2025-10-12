@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"shortify/db"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
@@ -46,17 +47,10 @@ var HankoValidator = NewHankoSessionValidator(HankoURL)
 
 var Routes = []Route{
 	{Path: "/", Method: http.MethodGet, Handler: homeHandler},
-	{Path: "/go/{id}", Method: http.MethodGet, Handler: urlRedirectHandler},
+	{Path: "/{route}/{id}", Method: http.MethodGet, Handler: urlRedirectHandler},
 	{Path: "/api/url/shortify", Method: http.MethodPost, Handler: AuthMiddleware(HankoValidator)(apiURLShortifyHandler)},
 	{Path: "/api/auth/validate", Method: http.MethodGet, Handler: AuthMiddleware(HankoValidator)(apiAuthValidateSessionHandler)},
 }
-
-// func MiddleWareExample(handler http.HandlerFunc) http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		fmt.Println("Hello from middle ware")
-// 		handler(w, r)
-// 	}
-// }
 
 func Init() {
 	r := mux.NewRouter()
@@ -101,14 +95,26 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 func urlRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	inlineParams := mux.Vars(r)
 	id := inlineParams["id"]
-	url, err := db.GetURLFromID(id)
+	route := inlineParams["route"]
+	data, err := db.GetURL(id)
+
 	if err != nil {
 		http.Redirect(w, r, "/", http.StatusNotFound)
 		return
-
 	}
+
+	if !strings.EqualFold(data.RouteName, route) {
+		http.Redirect(w, r, "/", http.StatusNotFound)
+		return
+	}
+
+	if !db.IsUrlActive(data.CreatedAt, data.ExpiresAt) {
+		http.Redirect(w, r, "/", http.StatusNotFound)
+		return
+	}
+
 	go db.IncrementURLClickCount(id)
-	http.Redirect(w, r, url, http.StatusFound)
+	http.Redirect(w, r, data.Url, http.StatusFound)
 }
 
 func apiURLShortifyHandler(w http.ResponseWriter, r *http.Request) {
