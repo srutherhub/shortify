@@ -14,10 +14,15 @@ type Route struct {
 }
 
 type Url struct {
-	ID         string
-	BaseRoute  int32
-	Url        string
-	CreatedAt  int64
-	ExpiresAt  pgtype.Int8
-	ClickCount pgtype.Int8
+	ID          string
+	BaseRoute   int32
+	Url         string
+	CreatedAt   int64
+	ExpiresAt   pgtype.Int8
+	ClickCount  pgtype.Int8
+	UtmSource   pgtype.Text
+	UtmMedium   pgtype.Text
+	UtmCampaign pgtype.Text
+	UtmTerm     pgtype.Text
+	UtmContent  pgtype.Text
 }

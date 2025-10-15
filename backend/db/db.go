@@ -3,10 +3,10 @@ package db
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	dbsqlc "shortify/db/sqlc"
+	"shortify/models"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -26,7 +26,6 @@ func Init() {
 
 	dbURL := os.Getenv("DB_URL")
 
-	fmt.Println(os.Getenv("DB_URL"))
 	pool, err := pgxpool.New(ctx, dbURL)
 	if err != nil {
 		panic(err)
@@ -48,19 +47,26 @@ func GetURL(id string) (dbsqlc.GetUrlFromIDRow, error) {
 	return data, nil
 }
 
-func InsertNewURL(url string) (string, error) {
+func InsertNewURL(data models.ShortifyRequestBody) (string, error) {
 	id := CreateUniqueID()
 	now := time.Now().Unix()
 
-	if len(url) < 8 {
+	if len(data.URL) < 8 {
 		return "", errors.New("invalid url")
 	}
 
-	if !isURLHttps(url) {
+	if !isURLHttps(data.URL) {
 		return "", errors.New("url is not https")
 	}
 
-	err := Queries.InsertNewUrl(ctx, dbsqlc.InsertNewUrlParams{ID: id, Url: url, CreatedAt: now})
+	ExpiresAt := pgtype.Int8{Int64: now + data.ExpiresIn, Valid: data.ExpiresIn != 0}
+	UtmSource := pgtype.Text{String: data.UtmSource, Valid: data.UtmSource != ""}
+	UtmMedium := pgtype.Text{String: data.UtmMedium, Valid: data.UtmMedium != ""}
+	UtmCampaign := pgtype.Text{String: data.UtmMedium, Valid: data.UtmCampaign != ""}
+	UtmContent := pgtype.Text{String: data.UtmContent, Valid: data.UtmContent != ""}
+	UtmTerm := pgtype.Text{String: data.UtmTerm, Valid: data.UtmTerm != ""}
+
+	err := Queries.InsertNewUrl(ctx, dbsqlc.InsertNewUrlParams{ID: id, Url: data.URL, CreatedAt: now, ExpiresAt: ExpiresAt, UtmSource: UtmSource, UtmMedium: UtmMedium, UtmCampaign: UtmCampaign, UtmContent: UtmContent, UtmTerm: UtmTerm})
 
 	if err != nil {
 		return "", err
@@ -71,6 +77,14 @@ func InsertNewURL(url string) (string, error) {
 func IncrementURLClickCount(id string) error {
 	err := Queries.IncrementUrlClickCount(ctx, id)
 	return err
+}
+
+func DeleteExpireUrl(id string, route string) error {
+	err := Queries.DeleteExpiredUrl(ctx, dbsqlc.DeleteExpiredUrlParams{ID: id, RouteName: route})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func CreateUniqueID() string {

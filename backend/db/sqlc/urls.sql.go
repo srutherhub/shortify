@@ -11,12 +11,19 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const deleteExpiredUrls = `-- name: DeleteExpiredUrls :exec
-DELETE FROM urls WHERE id = $1
+const deleteExpiredUrl = `-- name: DeleteExpiredUrl :exec
+DELETE FROM urls WHERE id = $1 AND base_route IN (SELECT route_id
+  FROM routes
+  WHERE route_name = $2)
 `
 
-func (q *Queries) DeleteExpiredUrls(ctx context.Context, id string) error {
-	_, err := q.db.Exec(ctx, deleteExpiredUrls, id)
+type DeleteExpiredUrlParams struct {
+	ID        string
+	RouteName string
+}
+
+func (q *Queries) DeleteExpiredUrl(ctx context.Context, arg DeleteExpiredUrlParams) error {
+	_, err := q.db.Exec(ctx, deleteExpiredUrl, arg.ID, arg.RouteName)
 	return err
 }
 
@@ -56,17 +63,33 @@ func (q *Queries) IncrementUrlClickCount(ctx context.Context, id string) error {
 
 const insertNewUrl = `-- name: InsertNewUrl :exec
 INSERT INTO urls
-  (id,url,created_at)
-VALUES($1, $2, $3)
+  (id,url,created_at,expires_at,utm_source,utm_medium,utm_campaign,utm_term,utm_content)
+VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
 `
 
 type InsertNewUrlParams struct {
-	ID        string
-	Url       string
-	CreatedAt int64
+	ID          string
+	Url         string
+	CreatedAt   int64
+	ExpiresAt   pgtype.Int8
+	UtmSource   pgtype.Text
+	UtmMedium   pgtype.Text
+	UtmCampaign pgtype.Text
+	UtmTerm     pgtype.Text
+	UtmContent  pgtype.Text
 }
 
 func (q *Queries) InsertNewUrl(ctx context.Context, arg InsertNewUrlParams) error {
-	_, err := q.db.Exec(ctx, insertNewUrl, arg.ID, arg.Url, arg.CreatedAt)
+	_, err := q.db.Exec(ctx, insertNewUrl,
+		arg.ID,
+		arg.Url,
+		arg.CreatedAt,
+		arg.ExpiresAt,
+		arg.UtmSource,
+		arg.UtmMedium,
+		arg.UtmCampaign,
+		arg.UtmTerm,
+		arg.UtmContent,
+	)
 	return err
 }
