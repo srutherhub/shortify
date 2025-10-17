@@ -1,0 +1,85 @@
+/*
+Namespace: Layout
+*/
+.layout-flex {
+  display: inline-flex;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+/*
+Namespace: Spacing
+*/
+.gap-rem {
+  gap: 1rem;
+}
+
+.pad-rem {
+  padding: 1rem;
+}
+
+.pad-half-rem {
+  padding: 0.5rem;
+}
+
+/*
+Namespace: Border
+*/
+.b-b {
+  border-bottom: var(--default-border);
+}
+
+/*
+Namespace: Button
+*/
+.sec-btn {
+  background-color: transparent;
+  font-family: "Google Sans Code", monospace;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-size: var(--font-reading);
+  color: var(--darkest);
+  border: 0;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+.sec-btn:hover {
+  color: var(--accent);
+}
+
+.prim-btn {
+  background-color: var(--accent);
+  font-family: "Google Sans Code", monospace;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-size: var(--font-reading);
+  color: var(--light);
+  border: 0;
+  border-radius: var(--default-border-radius);
+  padding: 0.5rem;
+  cursor: pointer;
+}
+.prim-btn:hover {
+  color: var(--darkest);
+}
+
+.ter-btn {
+  background-color: var(--lighter);
+  font-family: "Google Sans Code", monospace;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-size: var(--font-reading);
+  color: var(--darkest);
+  border: 0;
+  border-radius: var(--default-border-radius);
+  padding: 0.5rem;
+  cursor: pointer;
+}
+.ter-btn:hover {
+  color: var(--accent);
+}

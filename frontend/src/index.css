@@ -1,0 +1,86 @@
+:root {
+  --accent: #0caba8;
+  --darkest: #59554d;
+  --dark: #8c8880;
+  --medium: #bfb9ae;
+  --lighter: #d9d3c7;
+  --light: #f2ebdf;
+  --default-border: 1px solid var(--lighter);
+  --default-border-radius: 0.33rem;
+
+  --font-medium: 1rem;
+  --font-reading: 0.875rem;
+}
+
+html {
+  font-family: "Google Sans Code", monospace;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  background-color: var(--light);
+  color: var(--darkest);
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+}
+
+hanko-auth,
+hanko-profile {
+  /* Color Scheme */
+  --color: var(--darkest);
+  --color-shade-1: var(--medium);
+  --color-shade-2: var(--medium);
+
+  --brand-color: var(--accent);
+  --brand-color-shade-1: var(--medium);
+  --brand-contrast-color: var(--light);
+
+  --background-color: var(--light);
+  --error-color: #e82020;
+  --link-color: var(--accent);
+
+  /* Font Styles */
+  --font-weight: 500;
+  --font-size: var(--font-medium);
+  --font-family: "Google Sans Code", monospace;
+
+  /* Border Styles */
+  --border-radius: 8px;
+  --border-style: solid;
+  --border-width: 1px;
+
+  /* Item Styles */
+  --item-height: 34px;
+  --item-margin: 0.5rem 0;
+
+  /* Container Styles */
+  --container-padding: 30px;
+  --container-max-width: 410px;
+
+  /* Headline Styles */
+  --headline1-font-size: 24px;
+  --headline1-font-weight: 600;
+  --headline1-margin: 0 0 1rem;
+
+  --headline2-font-size: 16px;
+  --headline2-font-weight: 600;
+  --headline2-margin: 1rem 0 0.5rem;
+
+  /* Divider Styles */
+  --divider-padding: 0 42px;
+  --divider-visibility: visible;
+
+  /* Link Styles */
+  --link-text-decoration: none;
+  --link-text-decoration-hover: underline;
+
+  /* Input Styles */
+  --input-min-width: 14em;
+
+  /* Button Styles */
+  --button-min-width: max-content;
+}
