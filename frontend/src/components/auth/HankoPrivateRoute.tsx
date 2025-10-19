@@ -33,5 +33,5 @@ export default function HankoPrivateRoute({
   }
 
   //Url to naviage user to if they arent authenticated
-  return <Navigate to="/" replace state={{ from: location }} />;
+  return <Navigate to="/login" replace state={{ from: location }} />;
 }

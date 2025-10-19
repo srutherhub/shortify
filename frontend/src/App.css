@@ -1,12 +1,16 @@
 /*
 Namespace: Layout
 */
-.layout-flex {
+.horizontalstack {
   display: inline-flex;
 }
 
-.w-100 {
+.width100 {
   width: 100%;
+}
+
+.center {
+  justify-content: center;
 }
 
 /*
@@ -24,11 +28,20 @@ Namespace: Spacing
   padding: 0.5rem;
 }
 
+.pad-t-4rem {
+  padding-top: 4rem;
+}
+
 /*
 Namespace: Border
 */
 .b-b {
   border-bottom: var(--default-border);
+}
+
+.b {
+  border: var(--default-border);
+  border-radius: 0.33rem;
 }
 
 /*
@@ -81,5 +94,22 @@ Namespace: Button
   cursor: pointer;
 }
 .ter-btn:hover {
+  color: var(--accent);
+}
+
+.quad-btn {
+  background-color: transparent;
+  font-family: "Google Sans Code", monospace;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-size: var(--font-reading);
+  color: var(--darkest);
+  border: var(--default-border);
+  border-radius: var(--default-border-radius);
+  cursor: pointer;
+  padding: 0.5rem;
+}
+.quad-btn:hover {
   color: var(--accent);
 }
