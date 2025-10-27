@@ -52,6 +52,57 @@ func (q *Queries) GetUrlFromID(ctx context.Context, id string) (GetUrlFromIDRow,
 	return i, err
 }
 
+const getUserUrls = `-- name: GetUserUrls :many
+SELECT urls.id, urls.url, routes.route_name , urls.created_at, urls.expires_at, urls.utm_source, urls.utm_medium, urls.utm_campaign, urls.utm_term, urls.utm_content
+FROM urls
+  INNER JOIN routes ON urls.base_route = routes.route_id
+WHERE urls.username = $1
+`
+
+type GetUserUrlsRow struct {
+	ID          string
+	Url         string
+	RouteName   string
+	CreatedAt   int64
+	ExpiresAt   pgtype.Int8
+	UtmSource   pgtype.Text
+	UtmMedium   pgtype.Text
+	UtmCampaign pgtype.Text
+	UtmTerm     pgtype.Text
+	UtmContent  pgtype.Text
+}
+
+func (q *Queries) GetUserUrls(ctx context.Context, username string) ([]GetUserUrlsRow, error) {
+	rows, err := q.db.Query(ctx, getUserUrls, username)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserUrlsRow
+	for rows.Next() {
+		var i GetUserUrlsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Url,
+			&i.RouteName,
+			&i.CreatedAt,
+			&i.ExpiresAt,
+			&i.UtmSource,
+			&i.UtmMedium,
+			&i.UtmCampaign,
+			&i.UtmTerm,
+			&i.UtmContent,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const incrementUrlClickCount = `-- name: IncrementUrlClickCount :exec
 UPDATE urls SET click_count = click_count + 1 WHERE id = $1
 `
@@ -63,8 +114,8 @@ func (q *Queries) IncrementUrlClickCount(ctx context.Context, id string) error {
 
 const insertNewUrl = `-- name: InsertNewUrl :exec
 INSERT INTO urls
-  (id,url,created_at,expires_at,utm_source,utm_medium,utm_campaign,utm_term,utm_content)
-VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
+  (id,url,created_at,expires_at,utm_source,utm_medium,utm_campaign,utm_term,utm_content,username)
+VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 `
 
 type InsertNewUrlParams struct {
@@ -77,6 +128,7 @@ type InsertNewUrlParams struct {
 	UtmCampaign pgtype.Text
 	UtmTerm     pgtype.Text
 	UtmContent  pgtype.Text
+	Username    string
 }
 
 func (q *Queries) InsertNewUrl(ctx context.Context, arg InsertNewUrlParams) error {
@@ -90,6 +142,7 @@ func (q *Queries) InsertNewUrl(ctx context.Context, arg InsertNewUrlParams) erro
 		arg.UtmCampaign,
 		arg.UtmTerm,
 		arg.UtmContent,
+		arg.Username,
 	)
 	return err
 }

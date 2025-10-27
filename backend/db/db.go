@@ -47,7 +47,7 @@ func GetURL(id string) (dbsqlc.GetUrlFromIDRow, error) {
 	return data, nil
 }
 
-func InsertNewURL(data models.ShortifyRequestBody) (string, error) {
+func InsertNewURL(data models.ShortifyRequestBody, username string) (string, error) {
 	id := CreateUniqueID()
 	now := time.Now().Unix()
 
@@ -66,7 +66,7 @@ func InsertNewURL(data models.ShortifyRequestBody) (string, error) {
 	UtmContent := pgtype.Text{String: data.UtmContent, Valid: data.UtmContent != ""}
 	UtmTerm := pgtype.Text{String: data.UtmTerm, Valid: data.UtmTerm != ""}
 
-	err := Queries.InsertNewUrl(ctx, dbsqlc.InsertNewUrlParams{ID: id, Url: data.URL, CreatedAt: now, ExpiresAt: ExpiresAt, UtmSource: UtmSource, UtmMedium: UtmMedium, UtmCampaign: UtmCampaign, UtmContent: UtmContent, UtmTerm: UtmTerm})
+	err := Queries.InsertNewUrl(ctx, dbsqlc.InsertNewUrlParams{ID: id, Url: data.URL, CreatedAt: now, ExpiresAt: ExpiresAt, UtmSource: UtmSource, UtmMedium: UtmMedium, UtmCampaign: UtmCampaign, UtmContent: UtmContent, UtmTerm: UtmTerm, Username: username})
 
 	if err != nil {
 		return "", err
@@ -85,6 +85,15 @@ func DeleteExpireUrl(id string, route string) error {
 		return err
 	}
 	return nil
+}
+
+func GetUserUrls(username string) ([]dbsqlc.GetUserUrlsRow, error) {
+	urls, err := Queries.GetUserUrls(ctx, username)
+
+	if err != nil {
+		return nil, err
+	}
+	return urls, nil
 }
 
 func CreateUniqueID() string {

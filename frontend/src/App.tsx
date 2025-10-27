@@ -4,6 +4,7 @@ import LoginPage from "./routes/LoginPage";
 import HankoProfile from "./components/auth/HankoProfile";
 import HankoPrivateRoute from "./components/auth/HankoPrivateRoute";
 import Navbar from "./components/nav/Navbar";
+import DashboardPage from "./routes/DashboardPage";
 
 function App() {
   return (
@@ -14,22 +15,20 @@ function App() {
         <Route path="/login" element={<LoginPage />}></Route>
         <Route path="/products" element={<h1>Hello from products</h1>}></Route>
         <Route path="/pricing" element={<h1>Hello from pricing</h1>}></Route>
-        <Route path="/docs" element={<h1>Hello from docs</h1>}></Route>
+        <Route path="/docs" element={<h1>Documents</h1>}></Route>
         <Route
-          path="/dashboard"
+          path="/app"
           element={
             <HankoPrivateRoute>
-              {" "}
-              <h1>Hello from dashboard</h1>
+              <DashboardPage />
             </HankoPrivateRoute>
           }
         >
-          <Route path="/dashboard/profile" element={<HankoProfile />}></Route>
+          <Route path="profile" element={<HankoProfile />}></Route>
+          <Route path="analytics" element={<h1>Analytics</h1>}></Route>
+          <Route path="manage" element={<h1>Manage Links</h1>}></Route>
         </Route>
-        <Route
-          path="/changelog"
-          element={<h1>Hello from changelog</h1>}
-        ></Route>
+        <Route path="/changelog" element={<h1>Changelog</h1>}></Route>
       </Routes>
     </div>
   );

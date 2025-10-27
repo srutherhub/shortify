@@ -1,7 +1,9 @@
 package server
 
 import (
+	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -56,21 +58,72 @@ func (v *HankoSessionValidator) ValidateSession(token string) (bool, error) {
 func AuthMiddleware(validator SessionValidator) func(http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			cookie, err := r.Cookie("hanko")
-			if err != nil {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
-				return
-			}
+			if r.Header.Get("X-API-KEY") != "" {
+				//
+				//HANDLE API KEYS HERE
+				//
+			} else {
+				cookie, err := r.Cookie("hanko")
+				if err != nil {
+					http.Error(w, "Unauthorized", http.StatusUnauthorized)
+					return
+				}
 
-			isValid, err := validator.ValidateSession(cookie.Value)
-			if err != nil {
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				return
+				isValid, err := validator.ValidateSession(cookie.Value)
+				if err != nil {
+					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					return
+				}
+				if !isValid {
+					http.Error(w, "Unauthorized", http.StatusUnauthorized)
+					return
+				}
+
 			}
-			if !isValid {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
-				return
-			}
+			next(w, r)
 		})
 	}
+}
+
+func GetUserFromCookie(r *http.Request) (string, error) {
+	cookie, err := r.Cookie("hanko")
+	if err != nil {
+		return "", errors.New("auth cookie does not exist")
+	}
+	jwtParts := strings.Split(cookie.Value, ".")
+
+	if len(jwtParts) < 2 {
+		fmt.Println("Invalid token")
+		return "", errors.New("invalid login token")
+	}
+
+	data, err := base64.RawURLEncoding.DecodeString(jwtParts[1])
+	if err != nil {
+		return "", errors.New("failed to decode JWT claim")
+	}
+
+	var pretty JWTClaims
+	if err := json.Unmarshal(data, &pretty); err != nil {
+		return "", errors.New("failed to parse JWT claim JSON")
+	}
+
+	if pretty.Email.Address != "" {
+		return pretty.Email.Address, nil
+	} else {
+		return "", errors.New("failed to retrieve email from JWT")
+	}
+}
+
+type JWTClaims struct {
+	Audience []string `json:"aud"`
+	Email    struct {
+		Address    string `json:"address"`
+		IsPrimary  bool   `json:"is_primary"`
+		IsVerified bool   `json:"is_verified"`
+	} `json:"email"`
+	ExpiresAt int64  `json:"exp"`
+	IssuedAt  int64  `json:"iat"`
+	Issuer    string `json:"iss"`
+	SessionID string `json:"session_id"`
+	Subject   string `json:"sub"`
 }

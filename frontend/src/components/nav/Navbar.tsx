@@ -38,31 +38,21 @@ export default function Navbar() {
       btnStyle: EButtonStyles.secondary,
     },
     {
-      id: "navigation-linkto-signup",
-      displayText: "Signup",
-      onClick: () => navigate("/login"),
-      btnStyle: EButtonStyles.primary,
-    },
-    {
-      id: "navigation-linkto-dashboard",
+      id: "navigation-linkto-app",
       displayText: "Dashboard",
-      route: "/dashboard",
-      onClick: () => navigate("/dashboard"),
+      route: "/app",
+      onClick: () => navigate("/app"),
       btnStyle: EButtonStyles.tertiary,
     },
     {
-      id: "navigation-linkto-profile",
-      displayText: "Profile",
-      route: "/dashboard/profile",
-      onClick: () => navigate("/dashboard/profile"),
-      btnStyle: EButtonStyles.secondary,
+      id: "navigation-linkto-signin",
+      displayText: "Sign in",
+      onClick: () => navigate("/login"),
+      btnStyle: EButtonStyles.primary,
     },
   ];
 
-  const hiddenNavOptionsWhenLoggedIn = [
-    "navigation-pricing",
-    "navigation-linkto-signup",
-  ];
+  const hiddenNavOptionsWhenLoggedIn = ["navigation-linkto-signin"];
 
   const showNavOptionWhenLoggedIn = ["navigation-linkto-profile"];
 

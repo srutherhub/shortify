@@ -11,7 +11,7 @@ export default function HankoAuth() {
 
   const redirectAfterLogin = useCallback(() => {
     // redirect to a page in your application
-    navigate("/dashboard");
+    navigate("/app");
   }, [navigate]);
 
   useEffect(

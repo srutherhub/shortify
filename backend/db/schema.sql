@@ -11,6 +11,7 @@ CREATE TABLE urls
   utm_campaign TEXT,
   utm_term TEXT,
   utm_content TEXT,
+  username TEXT NOT NULL,
   PRIMARY KEY (id,base_route),
   FOREIGN KEY (base_route) REFERENCES routes(route_id) ON DELETE CASCADE
 );

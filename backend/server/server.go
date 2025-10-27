@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"shortify/db"
@@ -21,7 +20,8 @@ var HankoValidator = NewHankoSessionValidator(HankoURL)
 var Routes = []models.Route{
 	{Path: "/", Method: http.MethodGet, Handler: homeHandler},
 	{Path: "/{route}/{id}", Method: http.MethodGet, Handler: urlRedirectHandler},
-	{Path: "/api/url/shortify", Method: http.MethodPost, Handler: apiURLShortifyHandler},
+	{Path: "/api/url/shortify", Method: http.MethodPost, Handler: AuthMiddleware(HankoValidator)(apiURLShortifyHandler)},
+	{Path: "/api/url/getuserurls", Method: http.MethodGet, Handler: AuthMiddleware(HankoValidator)(apiURLGetUserUrlsHandler)},
 	{Path: "/api/auth/validate", Method: http.MethodGet, Handler: AuthMiddleware(HankoValidator)(apiAuthValidateSessionHandler)},
 }
 
@@ -56,13 +56,14 @@ func JSONResponse(w http.ResponseWriter, data interface{}) {
 	err = json.NewEncoder(w).Encode(data)
 
 	if err != nil {
-		http.Error(w, "Failed to encode JSON", http.StatusBadRequest)
+		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
 		return
 	}
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello from shortify")
+	fs := http.FileServer(http.Dir("../../frontend/dist"))
+	http.Handle("/", fs)
 }
 
 func urlRedirectHandler(w http.ResponseWriter, r *http.Request) {
@@ -92,7 +93,6 @@ func urlRedirectHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiURLShortifyHandler(w http.ResponseWriter, r *http.Request) {
-
 	var requestBody models.ShortifyRequestBody
 
 	decoder := json.NewDecoder(r.Body)
@@ -109,8 +109,16 @@ func apiURLShortifyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var username string
+	username, err = GetUserFromCookie(r)
+
+	if err != nil {
+		JSONResponse(w, models.ServerErrorResponse{Error: models.EInvalidRequest, Message: err.Error(), Status: http.StatusBadRequest})
+		return
+	}
+
 	var id string
-	id, err = db.InsertNewURL(requestBody)
+	id, err = db.InsertNewURL(requestBody, username)
 
 	if err != nil {
 		JSONResponse(w, models.ServerErrorResponse{Error: models.EInvalidRequest, Message: err.Error(), Status: http.StatusBadRequest})
@@ -123,4 +131,29 @@ func apiURLShortifyHandler(w http.ResponseWriter, r *http.Request) {
 
 func apiAuthValidateSessionHandler(w http.ResponseWriter, r *http.Request) {
 
+}
+
+func apiURLGetUserUrlsHandler(w http.ResponseWriter, r *http.Request) {
+	var username string
+	var err error
+	username, err = GetUserFromCookie(r)
+
+	if err != nil {
+		JSONResponse(w, models.ServerErrorResponse{Error: models.EInvalidRequest, Message: err.Error(), Status: http.StatusBadRequest})
+		return
+	}
+
+	urls, err := db.GetUserUrls(username)
+
+	if err != nil {
+		JSONResponse(w, models.ServerErrorResponse{Error: models.EInvalidRequest, Message: err.Error(), Status: http.StatusBadRequest})
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(urls)
+
+	if err != nil {
+		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+		return
+	}
 }

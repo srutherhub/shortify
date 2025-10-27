@@ -10,5 +10,10 @@ export default function HankoProfile() {
     });
   }, []);
 
-  return <hanko-profile />;
+  return (
+    <div>
+      <h1>Manage Account</h1>
+      <hanko-profile />
+    </div>
+  );
 }

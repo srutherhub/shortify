@@ -25,4 +25,5 @@ type Url struct {
 	UtmCampaign pgtype.Text
 	UtmTerm     pgtype.Text
 	UtmContent  pgtype.Text
+	Username    string
 }
