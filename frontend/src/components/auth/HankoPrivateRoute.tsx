@@ -13,7 +13,7 @@ export default function HankoPrivateRoute({
   const location = useLocation();
 
   useEffect(() => {
-    fetch(backendUrl + "/api/auth/validate", {
+    fetch(backendUrl + "/auth/validate", {
       credentials: "include",
     })
       .then((res) => {

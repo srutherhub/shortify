@@ -16,6 +16,8 @@ CREATE TABLE urls
   FOREIGN KEY (base_route) REFERENCES routes(route_id) ON DELETE CASCADE
 );
 
+CREATE INDEX idx_urls_username ON urls (username);
+
 CREATE TABLE routes
 (
   route_id SERIAL PRIMARY KEY,

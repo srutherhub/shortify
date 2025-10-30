@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"shortify/db"
@@ -12,14 +13,13 @@ import (
 	"github.com/rs/cors"
 )
 
-const RedirectEndpoint = "http://localhost:8080/GO/"
+const RedirectEndpoint = "http://localhost:8080/s/"
 const HankoURL = "https://7e09ca18-a6ff-46fc-b43a-4d35c0aa2cf2.hanko.io"
 
 var HankoValidator = NewHankoSessionValidator(HankoURL)
 
 var Routes = []models.Route{
-	{Path: "/", Method: http.MethodGet, Handler: homeHandler},
-	{Path: "/{route}/{id}", Method: http.MethodGet, Handler: urlRedirectHandler},
+	{Path: "/s/{route}/{id}", Method: http.MethodGet, Handler: urlRedirectHandler},
 	{Path: "/api/url/shortify", Method: http.MethodPost, Handler: AuthMiddleware(HankoValidator)(apiURLShortifyHandler)},
 	{Path: "/api/url/getuserurls", Method: http.MethodGet, Handler: AuthMiddleware(HankoValidator)(apiURLGetUserUrlsHandler)},
 	{Path: "/api/auth/validate", Method: http.MethodGet, Handler: AuthMiddleware(HankoValidator)(apiAuthValidateSessionHandler)},
@@ -28,7 +28,7 @@ var Routes = []models.Route{
 func Init() {
 	r := mux.NewRouter()
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowedOrigins:   []string{"http://localhost:8080"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,
@@ -39,7 +39,7 @@ func Init() {
 	for _, route := range Routes {
 		r.HandleFunc(route.Path, route.Handler).Methods(route.Method)
 	}
-	log.Fatal(http.ListenAndServe(":8080", handler))
+	log.Fatal(http.ListenAndServe(":5555", handler))
 }
 
 func JSONResponse(w http.ResponseWriter, data interface{}) {
@@ -61,15 +61,11 @@ func JSONResponse(w http.ResponseWriter, data interface{}) {
 	}
 }
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	fs := http.FileServer(http.Dir("../../frontend/dist"))
-	http.Handle("/", fs)
-}
-
 func urlRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	inlineParams := mux.Vars(r)
 	id := inlineParams["id"]
 	route := inlineParams["route"]
+	fmt.Println(id, route)
 	data, err := db.GetURL(id)
 
 	if err != nil {

@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 import type { IButton } from "../components/lib/Button";
 import { EButtonStyles } from "../components/lib/styles";
 import Button from "../components/lib/Button";
+import { useQuery } from "@tanstack/react-query";
+import { ShortUrl } from "../models/urls";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -48,6 +50,8 @@ export default function DashboardPage() {
     },
   ];
 
+  const query = useQuery({ queryKey: ["GetUserUrls"], queryFn: getUserUrls });
+
   const RenderMenuOptions: ReactNode = MenuOptions.map((item) => {
     return <Button key={item.id} {...item} />;
   });
@@ -61,6 +65,7 @@ export default function DashboardPage() {
       </div>
       <div className="grid-middle">
         <Outlet />
+        <div> {JSON.stringify(query.data)}</div>
       </div>
       <div className="grid-right"></div>
     </div>
@@ -74,3 +79,17 @@ function isCurrentRoute(route: string, location: Location): boolean {
     return false;
   }
 }
+
+const getUserUrls = async (): Promise<ShortUrl[]> => {
+  const baseUrl = import.meta.env.VITE_BACKEND_URL;
+  const response = await fetch(baseUrl + "/url/getuserurls", {
+    method: "GET",
+    credentials: "include",
+  });
+
+  const result: ShortUrl[] = await response.json();
+
+  const urls = result.map((item) => new ShortUrl(item));
+
+  return urls;
+};
