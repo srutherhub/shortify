@@ -24,3 +24,13 @@ FROM urls
   INNER JOIN routes ON urls.base_route = routes.route_id
 WHERE urls.username = $1
 ;
+
+-- name: GetTotalNumUrls :one
+SELECT COUNT(*)
+FROM urls
+WHERE urls.username = $1;
+
+-- name: GetTotalNumClickCount :one
+SELECT SUM(urls.click_count)
+FROM urls
+WHERE urls.username = $1;

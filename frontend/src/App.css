@@ -71,6 +71,22 @@ Namespace: Border
 }
 
 /*
+Namespace: Colors
+*/
+
+.invis {
+  color: transparent;
+}
+
+/*
+Namespace: Font
+*/
+
+.font-large {
+  font-size: larger;
+}
+
+/*
 Namespace: Button
 */
 .sec-btn {

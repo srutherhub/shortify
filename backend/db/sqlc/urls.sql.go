@@ -27,6 +27,32 @@ func (q *Queries) DeleteExpiredUrl(ctx context.Context, arg DeleteExpiredUrlPara
 	return err
 }
 
+const getTotalNumClickCount = `-- name: GetTotalNumClickCount :one
+SELECT SUM(urls.click_count)
+FROM urls
+WHERE urls.username = $1
+`
+
+func (q *Queries) GetTotalNumClickCount(ctx context.Context, username string) (int64, error) {
+	row := q.db.QueryRow(ctx, getTotalNumClickCount, username)
+	var sum int64
+	err := row.Scan(&sum)
+	return sum, err
+}
+
+const getTotalNumUrls = `-- name: GetTotalNumUrls :one
+SELECT COUNT(*)
+FROM urls
+WHERE urls.username = $1
+`
+
+func (q *Queries) GetTotalNumUrls(ctx context.Context, username string) (int64, error) {
+	row := q.db.QueryRow(ctx, getTotalNumUrls, username)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getUrlFromID = `-- name: GetUrlFromID :one
 SELECT urls.url, routes.route_name, urls.created_at, urls.expires_at
 FROM urls INNER JOIN routes on urls.base_route = routes.route_id

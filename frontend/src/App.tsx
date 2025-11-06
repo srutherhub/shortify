@@ -4,6 +4,7 @@ import LoginPage from "./routes/LoginPage";
 import HankoProfile from "./components/auth/HankoProfile";
 import HankoPrivateRoute from "./components/auth/HankoPrivateRoute";
 import Navbar from "./components/nav/Navbar";
+import AppPage from "./routes/AppPage";
 import DashboardPage from "./routes/DashboardPage";
 
 function App() {
@@ -20,10 +21,11 @@ function App() {
           path="/app"
           element={
             <HankoPrivateRoute>
-              <DashboardPage />
+              <AppPage />
             </HankoPrivateRoute>
           }
         >
+          <Route index element={<DashboardPage />} />
           <Route path="profile" element={<HankoProfile />}></Route>
           <Route path="analytics" element={<h1>Analytics</h1>}></Route>
           <Route path="manage" element={<h1>Manage Links</h1>}></Route>

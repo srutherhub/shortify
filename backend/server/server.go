@@ -4,31 +4,40 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
+	"os"
 	"shortify/db"
 	"shortify/models"
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"github.com/rs/cors"
+	"golang.org/x/sync/errgroup"
 )
 
-const RedirectEndpoint = "http://localhost:8080/s/"
+var _ = godotenv.Load()
+
+var ServerUrl = os.Getenv("SERVER_URL")
+var RedirectEndpoint = ServerUrl + "/s/"
+
 const HankoURL = "https://7e09ca18-a6ff-46fc-b43a-4d35c0aa2cf2.hanko.io"
 
 var HankoValidator = NewHankoSessionValidator(HankoURL)
 
 var Routes = []models.Route{
 	{Path: "/s/{route}/{id}", Method: http.MethodGet, Handler: urlRedirectHandler},
-	{Path: "/api/url/shortify", Method: http.MethodPost, Handler: AuthMiddleware(HankoValidator)(apiURLShortifyHandler)},
+	{Path: "/api/url/shortify", Method: http.MethodPost, Handler: AuthMiddleware(HankoValidator)(apiURLShortifyHandler), IsPublic: true},
 	{Path: "/api/url/getuserurls", Method: http.MethodGet, Handler: AuthMiddleware(HankoValidator)(apiURLGetUserUrlsHandler)},
+	{Path: "/api/url/getquickstats", Method: http.MethodGet, Handler: AuthMiddleware(HankoValidator)(apiURLGetQuickStatsHandler)},
 	{Path: "/api/auth/validate", Method: http.MethodGet, Handler: AuthMiddleware(HankoValidator)(apiAuthValidateSessionHandler)},
 }
 
 func Init() {
 	r := mux.NewRouter()
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8080"},
+		AllowedOrigins:   []string{"http://localhost:8080", "http://localhost:5173"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,
@@ -146,10 +155,50 @@ func apiURLGetUserUrlsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewEncoder(w).Encode(urls)
+	JSONResponse(w, urls)
 
 	if err != nil {
 		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
 		return
 	}
+}
+
+func apiURLGetQuickStatsHandler(w http.ResponseWriter, r *http.Request) {
+	username, err := GetUserFromCookie(r)
+
+	if err != nil {
+		JSONResponse(w, models.ServerErrorResponse{Error: models.EInvalidRequest, Message: err.Error(), Status: http.StatusBadRequest})
+		return
+	}
+
+	var g errgroup.Group
+	var totalUrlCount int64
+	var totalClickCount int64
+
+	g.Go(func() error {
+		var err error
+		totalUrlCount, err = db.GetTotalNumUrls(username)
+		return err
+	})
+
+	g.Go(func() error {
+		var err error
+		totalClickCount, err = db.GetTotalNumClickCount(username)
+		return err
+	})
+
+	if err := g.Wait(); err != nil {
+		JSONResponse(w, models.ServerErrorResponse{
+			Error:   models.EAppError,
+			Message: err.Error(),
+			Status:  http.StatusInternalServerError,
+		})
+		return
+	}
+
+	avgClicksPerUrl := math.Round((float64(totalClickCount) / float64(totalUrlCount) * 100)) / 100
+
+	res := models.QuickStatsResponse{Total_Urls: totalUrlCount, Total_Click_Count: totalClickCount, Average_Clicks_Per_Url: avgClicksPerUrl}
+
+	JSONResponse(w, res)
 }

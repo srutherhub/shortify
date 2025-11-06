@@ -107,8 +107,8 @@ func GetUserFromCookie(r *http.Request) (string, error) {
 		return "", errors.New("failed to parse JWT claim JSON")
 	}
 
-	if pretty.Email.Address != "" {
-		return pretty.Email.Address, nil
+	if pretty.Subject != "" {
+		return pretty.Subject, nil
 	} else {
 		return "", errors.New("failed to retrieve email from JWT")
 	}

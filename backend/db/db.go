@@ -96,6 +96,22 @@ func GetUserUrls(username string) ([]dbsqlc.GetUserUrlsRow, error) {
 	return urls, nil
 }
 
+func GetTotalNumUrls(username string) (int64, error) {
+	cnt, err := Queries.GetTotalNumUrls(ctx, username)
+	if err != nil {
+		return 0, err
+	}
+	return cnt, nil
+}
+
+func GetTotalNumClickCount(username string) (int64, error) {
+	cnt, err := Queries.GetTotalNumClickCount(ctx, username)
+	if err != nil {
+		return 0, err
+	}
+	return cnt, nil
+}
+
 func CreateUniqueID() string {
 	id := shortid.MustGenerate()
 	return id

@@ -5,9 +5,10 @@ import "net/http"
 type ServerError string
 
 type Route struct {
-	Path    string
-	Method  string
-	Handler http.HandlerFunc
+	Path     string
+	Method   string
+	Handler  http.HandlerFunc
+	IsPublic bool
 }
 
 type ServerErrorResponse struct {
@@ -28,6 +29,12 @@ type ShortifyRequestBody struct {
 
 type ShortifyResponse struct {
 	URL string `json:"shorturl"`
+}
+
+type QuickStatsResponse struct {
+	Total_Urls             int64   `json:"total_url_count"`
+	Total_Click_Count      int64   `json:"total_click_count"`
+	Average_Clicks_Per_Url float64 `json:"avg_clicks_per_url"`
 }
 
 const (
