@@ -15,6 +15,7 @@ export default function AppPage() {
       displayText: "Dashboard",
       route: "/dashboard",
       onClick: () => navigate("/app"),
+      icon: "material-symbols--space-dashboard-outline",
       btnStyle: isCurrentRoute("/app", location)
         ? EButtonStyles.tertiary
         : EButtonStyles.secondary,
@@ -24,6 +25,7 @@ export default function AppPage() {
       displayText: "Manage Links",
       route: "Analytics",
       onClick: () => navigate("manage"),
+      icon: "material-symbols--manage-search-rounded",
       btnStyle: isCurrentRoute("/app/manage", location)
         ? EButtonStyles.tertiary
         : EButtonStyles.secondary,
@@ -33,6 +35,7 @@ export default function AppPage() {
       displayText: "Analytics",
       route: "Analytics",
       onClick: () => navigate("analytics"),
+      icon: "material-symbols--insert-chart-outline-rounded",
       btnStyle: isCurrentRoute("/app/analytics", location)
         ? EButtonStyles.tertiary
         : EButtonStyles.secondary,
@@ -42,6 +45,7 @@ export default function AppPage() {
       displayText: "Profile",
       route: "profile",
       onClick: () => navigate("profile"),
+      icon: "material-symbols--account-circle",
       btnStyle: isCurrentRoute("/app/profile", location)
         ? EButtonStyles.tertiary
         : EButtonStyles.secondary,
@@ -53,9 +57,9 @@ export default function AppPage() {
   });
 
   return (
-    <div className="grid gap-rem pad-t-4rem">
-      <div className="grid-left pad-t-4rem">
-        <div className="verticalstack gap-rem pad-half-rem b ">
+    <div className="grid gap-rem pad-rem">
+      <div className="grid-middle flex center">
+        <div className={`gap-rem pad-half-rem b horizontalstack`}>
           {RenderMenuOptions}
         </div>
       </div>

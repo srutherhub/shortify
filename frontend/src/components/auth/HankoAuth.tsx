@@ -30,5 +30,5 @@ export default function HankoAuth() {
     });
   }, []);
 
-  return <hanko-auth className="b" />;
+  return <hanko-auth />;
 }

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useIsMobileView } from "../models/utils";
 
 interface IQuickStats {
   total_url_count: number;
@@ -11,11 +12,14 @@ export default function DashboardPage() {
     queryKey: ["GetQuickStats"],
     queryFn: getQuickStats,
   });
+  const isMobile = useIsMobileView();
 
   return (
     <div>
-      <h1>Dashboard</h1>
-      <div className="horizontalstack gap-rem">
+      <h2>Activity</h2>
+      <div
+        className={`gap-rem ${isMobile ? "verticalstack" : "horizontalstack"}`}
+      >
         <BoxWithLabel
           title={"Number of Active Urls"}
           desc={data?.total_url_count}

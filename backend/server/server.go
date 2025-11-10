@@ -37,7 +37,7 @@ var Routes = []models.Route{
 func Init() {
 	r := mux.NewRouter()
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8080", "http://localhost:5173"},
+		AllowedOrigins:   []string{"http://localhost:8080", "http://localhost:5173", "http://192.168.1.66:5173", "https://192.168.1.66:5173", "https://localhost:5173"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,
@@ -196,7 +196,12 @@ func apiURLGetQuickStatsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	avgClicksPerUrl := math.Round((float64(totalClickCount) / float64(totalUrlCount) * 100)) / 100
+	var avgClicksPerUrl float64
+	if totalUrlCount == 0 {
+		avgClicksPerUrl = 0
+	} else {
+		avgClicksPerUrl = math.Round((float64(totalClickCount) / float64(totalUrlCount) * 100)) / 100
+	}
 
 	res := models.QuickStatsResponse{Total_Urls: totalUrlCount, Total_Click_Count: totalClickCount, Average_Clicks_Per_Url: avgClicksPerUrl}
 

@@ -5,6 +5,7 @@
   --medium: #bfb9ae;
   --lighter: #d9d3c7;
   --light: #f2ebdf;
+  --error: red;
   --default-border: 1px solid var(--lighter);
   --default-border-radius: 0.33rem;
 
@@ -21,6 +22,12 @@ html {
   color: var(--darkest);
   padding: 0;
   margin: 0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 body {

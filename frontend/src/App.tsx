@@ -6,6 +6,7 @@ import HankoPrivateRoute from "./components/auth/HankoPrivateRoute";
 import Navbar from "./components/nav/Navbar";
 import AppPage from "./routes/AppPage";
 import DashboardPage from "./routes/DashboardPage";
+import ManageLinksPage from "./routes/ManageLinksPage";
 
 function App() {
   return (
@@ -28,7 +29,7 @@ function App() {
           <Route index element={<DashboardPage />} />
           <Route path="profile" element={<HankoProfile />}></Route>
           <Route path="analytics" element={<h1>Analytics</h1>}></Route>
-          <Route path="manage" element={<h1>Manage Links</h1>}></Route>
+          <Route path="manage" element={<ManageLinksPage />}></Route>
         </Route>
         <Route path="/changelog" element={<h1>Changelog</h1>}></Route>
       </Routes>

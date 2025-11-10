@@ -26,11 +26,11 @@ WHERE urls.username = $1
 ;
 
 -- name: GetTotalNumUrls :one
-SELECT COUNT(*)
+SELECT CAST(COALESCE(COUNT(*) ,0)AS BIGINT)
 FROM urls
 WHERE urls.username = $1;
 
 -- name: GetTotalNumClickCount :one
-SELECT SUM(urls.click_count)
+SELECT CAST(COALESCE(SUM(urls.click_count) ,0)AS BIGINT)
 FROM urls
 WHERE urls.username = $1;

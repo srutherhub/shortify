@@ -6,6 +6,7 @@ export interface IButton {
   route?: string;
   onClick?: () => void;
   btnStyle?: ButtonStyle;
+  icon?: string;
 }
 
 export default function Button(props: IButton) {
@@ -15,7 +16,7 @@ export default function Button(props: IButton) {
       aria-label={props.id}
       onClick={props.onClick}
     >
-      {props.displayText}
+      <span className={props.icon}></span> {props.displayText}
     </button>
   );
 }

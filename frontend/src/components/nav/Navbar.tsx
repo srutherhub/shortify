@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import Button from "../lib/Button";
 import { EButtonStyles } from "../lib/styles";
 import type { IButton } from "../lib/Button";
@@ -9,6 +9,8 @@ import HankoLogout from "../auth/HankoLogout";
 export default function Navbar() {
   const navigate = useNavigate();
   const isLoggedIn = useIsLoggedIn();
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+
   const NavOptions: IButton[] = [
     {
       id: "navigation-linkto-products",
@@ -54,24 +56,43 @@ export default function Navbar() {
 
   const hiddenNavOptionsWhenLoggedIn = ["navigation-linkto-signin"];
 
-  const showNavOptionWhenLoggedIn = ["navigation-linkto-profile"];
-
   const RenderNavOptions: ReactNode = NavOptions.map((item) => {
     if (isLoggedIn && hiddenNavOptionsWhenLoggedIn.includes(item.id)) {
       return null;
     } else {
-      if (!isLoggedIn && showNavOptionWhenLoggedIn.includes(item.id)) {
-        return null;
-      } else {
-        return <Button key={item.id} {...item} />;
-      }
+      return <Button key={item.id} {...item} />;
     }
   });
 
+  const hamburger: IButton = {
+    id: "mobile-nav-button",
+    displayText: isMobileNavOpen ? "X" : "☰",
+    onClick: () => {
+      setIsMobileNavOpen(!isMobileNavOpen);
+    },
+    btnStyle: EButtonStyles.secondary,
+  };
+
   return (
-    <nav className="horizontalstack gap-rem width100 center b-b pad-half-rem">
-      {RenderNavOptions}
-      <HankoLogout />
+    <nav className="horizontalstack width100 center b-b pad-half-rem">
+      <div className="horizontalstack gap-rem mobile-hidden">
+        {RenderNavOptions}
+        <HankoLogout />
+      </div>
+      <div className="verticalstack mobile-visible width100 pad-half-rem">
+        <div className="horizontalstack width100 spacebetween">
+          <>LOGO</>
+          <Button {...hamburger} />
+        </div>
+        {isMobileNavOpen ? (
+          <div className="animate-fade-slide-in animate-fade-slide-out verticalstack gap-half-rem align-center">
+            {RenderNavOptions}
+            <HankoLogout />
+          </div>
+        ) : (
+          ""
+        )}
+      </div>
     </nav>
   );
 }
