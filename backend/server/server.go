@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"math"
 	"net/http"
@@ -20,7 +19,7 @@ import (
 var _ = godotenv.Load()
 
 var ServerUrl = os.Getenv("SERVER_URL")
-var RedirectEndpoint = ServerUrl + "/s/"
+var RedirectEndpoint = ServerUrl + "/s/" + "go/"
 
 const HankoURL = "https://7e09ca18-a6ff-46fc-b43a-4d35c0aa2cf2.hanko.io"
 
@@ -74,7 +73,7 @@ func urlRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	inlineParams := mux.Vars(r)
 	id := inlineParams["id"]
 	route := inlineParams["route"]
-	fmt.Println(id, route)
+
 	data, err := db.GetURL(id)
 
 	if err != nil {

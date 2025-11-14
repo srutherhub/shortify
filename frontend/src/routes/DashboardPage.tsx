@@ -1,11 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useIsMobileView } from "../models/utils";
-
-interface IQuickStats {
-  total_url_count: number;
-  total_click_count: number;
-  avg_clicks_per_url: number;
-}
+import { getQuickStats } from "../api/GetQuickStats";
 
 export default function DashboardPage() {
   const { data, isLoading } = useQuery({
@@ -17,6 +12,7 @@ export default function DashboardPage() {
   return (
     <div>
       <h2>Activity</h2>
+      <h2>Engagement</h2>
       <div
         className={`gap-rem ${isMobile ? "verticalstack" : "horizontalstack"}`}
       >
@@ -62,15 +58,3 @@ function BoxWithLabel(props: IBoxwithLabelProps) {
     </div>
   );
 }
-
-const getQuickStats = async () => {
-  const baseUrl = import.meta.env.VITE_BACKEND_URL;
-  const response = await fetch(baseUrl + "/url/getquickstats", {
-    method: "GET",
-    credentials: "include",
-  });
-
-  const result: IQuickStats = await response.json();
-
-  return result;
-};

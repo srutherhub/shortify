@@ -100,7 +100,7 @@ Namespace: Colors
 */
 
 .invis {
-  color: transparent;
+  visibility: hidden;
 }
 
 .error {

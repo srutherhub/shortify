@@ -22,6 +22,7 @@ html {
   color: var(--darkest);
   padding: 0;
   margin: 0;
+  /* filter: invert(1); */
 }
 
 *,
